@@ -1,42 +1,59 @@
 # Intro - Chris Wood
 
 Compared TLS development to QUIC Development.
+
 Described what motivated QUIPS.
 
 # A security model & verified implementation of the QUIC record layer - Antoine Delignat-Lavaud
+
 What is QUIC?
+
 Motivations for QUIC.
+
 How it works:
 * Internal modularity
    * Research area: Use of TLS Traffic secrets being used directly by QUIC record layer
 * Packet format
+
 Open security problems in QUIC (at least 7):
 * New custom construction for encryption packets (focus of talk)
 * …
+
 Verification Goals:
 * Functional correctness
 * Cryptographic security
 * Verified implementation
+
 QUIC record layer description
+
 QUIC packet encryption
+
 Modelling single packet encryption
+
 An attack on pre-draft 13 packet encryption
+
 Digression: are CIDs authenticated?
+
 Specifying QUIC packets formats (everparse)
 * New bitfield and bitsum combinations
+
 Theorem: QUIC header format
+
 Theorem: QUIC header encryption format
+
 Decryption window condition
+
 Going back to Security Model
+
 Packet stream security definition
+
 Proof: Code reduction
+
 Remaining issues with QPE
 * Some implementations skip the payload decryption based on the value of the decrypted packet number (this reveals information)
 * Very tricky to implement constant-time decryption: first decrypt 2 lsb of flags, then truncate mask, then decrypt PN … unsafe
 * Authentication of LN still depends on header formatting ,we prefer to include Ln in nonce (2msb are not used)
 A simplified construction (propose provably secure nonce-hiding constructions to CFRG).
-Evaluation
-Conclusions
 
 Questions:
 1. CW: You mention constant time is tricky: is it constant time?
