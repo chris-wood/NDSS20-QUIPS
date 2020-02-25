@@ -4,26 +4,26 @@ Compared TLS development to QUIC Development.
 Described what motivated QUIPS.
 
 # A security model & verified implementation of the QUIC record layer - Antoine Delignat-Lavaud
-
 What is QUIC?
 Motivations for QUIC.
 How it works:
-- Internal modularity
-  - Research area: Use of TLS Traffic secrets being used directly by QUIC record layer
-- Packet format
+* Internal modularity
+   * Research area: Use of TLS Traffic secrets being used directly by QUIC record layer
+* Packet format
 Open security problems in QUIC (at least 7):
-  - New custom construction for encryption packets (focus of talk)
+* New custom construction for encryption packets (focus of talk)
+* …
 Verification Goals:
-- Functional correctness
-- Cryptographic security
-- Verified implementation
+* Functional correctness
+* Cryptographic security
+* Verified implementation
 QUIC record layer description
 QUIC packet encryption
 Modelling single packet encryption
 An attack on pre-draft 13 packet encryption
 Digression: are CIDs authenticated?
 Specifying QUIC packets formats (everparse)
-- New bitfield and bitsum combinations
+* New bitfield and bitsum combinations
 Theorem: QUIC header format
 Theorem: QUIC header encryption format
 Decryption window condition
@@ -31,25 +31,26 @@ Going back to Security Model
 Packet stream security definition
 Proof: Code reduction
 Remaining issues with QPE
-- Some implementations skip the payload decryption based on the value of the decrypted packet number (this reveals information)
-- Very tricky to implement constant-time decryption: first decrypt 2 lsb of flags, then truncate mask, then decrypt PN … unsafe
-- Authentication of LN still depends on header formatting ,we prefer to include Ln in nonce (2msb are not used)
+* Some implementations skip the payload decryption based on the value of the decrypted packet number (this reveals information)
+* Very tricky to implement constant-time decryption: first decrypt 2 lsb of flags, then truncate mask, then decrypt PN … unsafe
+* Authentication of LN still depends on header formatting ,we prefer to include Ln in nonce (2msb are not used)
 A simplified construction (propose provably secure nonce-hiding constructions to CFRG).
 Evaluation
 Conclusions
 
 Questions:
-CW: You mention constant time is tricky: is it constant time?
-- Yes.
-CW: What about the processing time of packet once decrypted? Does padding cause problems because it is linear?
-- It is a concern.  You could do it, but it might be less flexible.  Sparse padding validation you need to consider the amount of frames that are included.
-MT: ACK, STREAM, etc. processing are all different. When do you stop trying to be constant time?
-- Unclear, since traffic analysis is hard and application specific.
-- Might be worth keeping padding at the end?
-CW: Is there any chance we can include CID length into version?
-- Commitments have been made to note change things that are version specific.
-- Expect applications to do their own version for variable length CID.
-- Authenticating CID is, however, probably doable.  Need transport parameter for dcid.
+1. CW: You mention constant time is tricky: is it constant time?
+   1. Yes.
+2. CW: What about the processing time of packet once decrypted? Does padding cause problems because it is linear?
+   1. It is a concern.  You could do it, but it might be less flexible.  Sparse padding validation you need to consider the amount of frames that are included.
+3. MT: ACK, STREAM, etc. processing are all different. When do you stop trying to be constant time?
+   1. Unclear, since traffic analysis is hard and application specific.
+   2. Might be worth keeping padding at the end?
+4. CW: Is there any chance we can include CID length into version?
+   1. Commitments have been made to note change things that are version specific.
+   2. Expect applications to do their own version for variable length CID.
+   3. Authenticating CID is, however, probably doable.  Need transport parameter for dcid.
+
 
 # Two-Tier Authenticated Encryption: Nonce Hiding in QUIC - Felix Günther
 What is the cryptographic primitive in hiding noce
@@ -59,71 +60,75 @@ Why a dedicated primitive?
 Recap: Classical Nonce-based AE
 Nonce-hdiing AE
 Two-tier AE (it’s still one function on encryption, two-step description though)
-You don’t specify the security properties!?
-Yes this is just the syntactic party will get to security next.
+1. You don’t specify the security properties!?
+   1. Yes this is just the syntactic party will get to security next.
 Two-tier AE security
 QPE Core: AEX (AES with XOR)
-Doesn’t deal with varint
+1. Doesn’t deal with varint
 QPE is (partially nonce-hiding)?
 Mapping two-tier AEX to  QPE
 Future work:
-Want to hide header bits
-FS through rotating AE encryption
-ADL (Antoine Delignat-Lavaud): The QUIC should looks at this because we could have a more flexible model
-MT (Martin Thomson): Tier 2 is constant because we have them under the same protection
-ADL: We don’t update header protection keys.
-AH (Amir Hertzberg)): If you don’t update it - it sounds like it’s not actually one primitive?  The properties should hold.
-FG (Felix Günther): We believe that there is benefit to keeping them together in one.  Allows us to model each tier separately and interactions between the two.
-Further instantiations of two-tier AE
-Application to other settings
+1. Want to hide header bits
+2. FS through rotating AE encryption
+   * ADL (Antoine Delignat-Lavaud): The QUIC should looks at this because we could have a more flexible model
+   * MT (Martin Thomson): Tier 2 is constant because we have them under the same protection
+   * ADL: We don’t update header protection keys.
+   * AH (Amir Hertzberg)): If you don’t update it - it sounds like it’s not actually one primitive?  The properties should hold.
+   * FG (Felix Günther): We believe that there is benefit to keeping them together in one.  Allows us to model each tier separately and interactions between the two.
+3. Further instantiations of two-tier AE
+4. Application to other settings
 Summary
 
+
 Questions:
-CW: What is the status of the CFRG draft?
-ADL: Just an idea now.
-ADL: It would be better to have the CFRG provably secure construct and try to get them adopted so that other WGs could just use it.
-MT: We started out not shooting for much security.
-CW (Chris Wood): Timing?
-MT: Probably not going to line up, but once it’s done sure we could point to it.
-CW: Why did we hide the key phase bit?
-MT: Comes down to the correlation.
-BT (Brian Trammel): Not much analysis about the marginal risk.
-MT: If we could get further along with the analysis - if the one bit doesn’t make much difference then we could put it back in the clear.
-BT: Does this generalize to n-tier authentication encryption?
-FG: Sure … Understand this might not be ready for QUIC.
-BT: We put them key phase and packet number bits because it was convenient.
-ST (Sean Turner): TIme frame for CFRG?
-Everybody: Who knows.
-MT: Once we get into multiple tiers we have to think about things like computational costs.  Getting them to swallow one was too much more might be a bridge too far. 
+1. CW: What is the status of the CFRG draft?
+   1. ADL: Just an idea now.
+   2. ADL: It would be better to have the CFRG provably secure construct and try to get them adopted so that other WGs could just use it.
+   3. MT: We started out not shooting for much security.
+   4. CW (Chris Wood): Timing?
+   5. MT: Probably not going to line up, but once it’s done sure we could point to it.
+   6. CW: Why did we hide the key phase bit?
+   7. MT: Comes down to the correlation.
+   8. BT (Brian Trammel): Not much analysis about the marginal risk.
+   9. MT: If we could get further along with the analysis - if the one bit doesn’t make much difference then we could put it back in the clear.
+2. BT: Does this generalize to n-tier authentication encryption?
+   1. FG: Sure … Understand this might not be ready for QUIC.
+   2. BT: We put them key phase and packet number bits because it was convenient.
+   3. ST (Sean Turner): TIme frame for CFRG?
+   4. Everybody: Who knows.
+   5. MT: Once we get into multiple tiers we have to think about things like computational costs.  Getting them to swallow one was too much more might be a bridge too far. 
+
 
 # QuicR: QUIC Resiliency to BW-DoS Attacks - Amir Herzberg
 BW = Bandwifth
 
+
 BW-DDoS attacks cause Clodding: Loss and Latency
 Defense against BW-DDoS, clogging
-LE (Lars Eggert): duplicate packets (in a congested network) only works if not everybody does it!
+* LE (Lars Eggert): duplicate packets (in a congested network) only works if not everybody does it!
 What is QuicR is all about?
 QuicR
 Impact and Reaction to Clogging
 Congestion-control responds dramatically to losses
 QuicR’s modes of operation
 QuicR’s FEC and Retransmission
-ADL: In the case of QUIC where do you put the additional information?
-AH: Send it as additional packets.
-AH: Yes you would need to know the redundancy packets.
-MB (Mike Boyle): Question about notation.
-LE: Emulating DoDs by introducing random doS. This is not how it is usually done.  The loss rate you look at the rate of the DDoS not the queue.
-AH: We have bombarded the queue previously.
+1. ADL: In the case of QUIC where do you put the additional information?
+   1. AH: Send it as additional packets.
+   2. AH: Yes you would need to know the redundancy packets.
+2. MB (Mike Boyle): Question about notation.
+3. LE: Emulating DoDs by introducing random doS. This is not how it is usually done.  The loss rate you look at the rate of the DDoS not the queue.
+   1. AH: We have bombarded the queue previously.
 Results
-ADL: how many packets
-AH: It’s about twice at 30%
+1. ADL: how many packets
+   1. AH: It’s about twice at 30%
 Conclusion and To-Dos
 
+
 Questions
-If you want to deploy a FEC-based system to QUIC?
-Need some additional information.
-MT: I think you might need the information at the frame vs packet level.
-Yes.
+1. If you want to deploy a FEC-based system to QUIC?
+   1. Need some additional information.
+2. MT: I think you might need the information at the frame vs packet level.
+   1. Yes.
 # Secure Communication Channel Establishment: TLS 1.3 (over TCP Fast Open) vs QUIC - Samuel Jero 
 Secure Communication on the Web
 How is Internet Traffic Encrypted
@@ -135,77 +140,78 @@ Prior Work: TLS1.3 vs QUIC
 Our Work: Comparing Layered Protocols
 Step 1: Protocol Syntax
 Step 2: Security Model
-ADL: Do you prove KE Header and Payload Integrity?
-SJ (Samuel Jero) We tried to prove that. And, no you don’t get any of that for these protocols.
-ADL: Channel Security - what granularity level of authentication?
-SJ: We went for a coarse grain model.
-HM: Why couldn’t you just use the session level keys?
-MT: I will get into that later.  The server might not have access to session level keys.
-SJ: You could probably develop the new security property could include that.
+1. ADL: Do you prove KE Header and Payload Integrity?
+   1. SJ (Samuel Jero) We tried to prove that. And, no you don’t get any of that for these protocols.
+2. ADL: Channel Security - what granularity level of authentication?
+   1. SJ: We went for a coarse grain model.
+3. HM: Why couldn’t you just use the session level keys?
+   1. MT: I will get into that later.  The server might not have access to session level keys.
+   2. SJ: You could probably develop the new security property could include that.
 Summary of Security Results
-SJ: Nobody gets header and payload security. But no practical attack found against gQUIC/QUIC.
-ADL: Paper proof?
-SJ: Yes.
-MT: Have you disclosed these?
-SJ: Yes.
+1. SJ: Nobody gets header and payload security. But no practical attack found against gQUIC/QUIC.
+2. ADL: Paper proof?
+   1. SJ: Yes.
+3. MT: Have you disclosed these?
+   1. SJ: Yes.
 Reset Authentication
 TFO Cookie Removal Attack
-MT: Not deployed in FF.
-BT: 2017 scans reported 3% and 83.9 where 1.3.5.6.9 (i.e., Google).
+1. MT: Not deployed in FF.
+2. BT: 2017 scans reported 3% and 83.9 where 1.3.5.6.9 (i.e., Google).
 # Robust Channels: Handling Unreliable Network Messages in QUIC’s Record Layer - Felix Günther
 Recap: Secure Channels over TCP
 Handling Unreliable Transport
 We’re not the first to look at channels
 Generalizing Channel Correctness
-FG: DTLS1.2 was claimed to be level 2.
-MT: DTLS was not implemented like that.
-AH: Reordering is within the window?
-FG: Yes - reduces the amount of window.
-MT: If you see a number far in the window - they will jump forward and then forget everything before.
-ADL: If you have a dynamic scaling window then you need to change predicate?
-FG: QUIC predicate needs the model specialized.
+1. FG: DTLS1.2 was claimed to be level 2.
+   1. MT: DTLS was not implemented like that.
+2. AH: Reordering is within the window?
+   1. FG: Yes - reduces the amount of window.
+   2. MT: If you see a number far in the window - they will jump forward and then forget everything before.
+3. ADL: If you have a dynamic scaling window then you need to change predicate?
+   1. FG: QUIC predicate needs the model specialized.
 Defining (ROB) Robustness
 INT (Integrity)
 ROB-INT
-Are there more constraints about an error not affecting later?
-GH: You could count, but it’s not required.
+1. Are there more constraints about an error not affecting later?
+   1. GH: You could count, but it’s not required.
 A Robust HIerarchy
 QPE
 QUIC Channel
-MT: Does this argue for more authentication a AEAD
-GH: Gets to how you define primitives.
-ADL: What it really means is that in QUIC you have to rekey more often.  You to need do it more quickly.
-ADL: Does it make sense to count the number of errors at the recipient?  It seems to help you.
-ADL: What you want to stop is a low recipient number.
-MT: I may at a receiver count the number of packets thrown away and the correctly received packets and when it hits a limit rekey.
-MT: No limit on the number of rekeys.
+1. MT: Does this argue for more authentication a AEAD
+   1. GH: Gets to how you define primitives.
+   2. ADL: What it really means is that in QUIC you have to rekey more often.  You to need do it more quickly.
+   3. ADL: Does it make sense to count the number of errors at the recipient?  It seems to help you.
+   4. ADL: What you want to stop is a low recipient number.
+   5. MT: I may at a receiver count the number of packets thrown away and the correctly received packets and when it hits a limit rekey.
+   6. MT: No limit on the number of rekeys.
+
 
 # QUIC Security Summary - Martin Thomson
 QUIC handshake overview
-ADL: The point of the handshake done is to get rid of the previous state.
-MT: Yes and more on this later.
-ADL: Another way to think about is that the on the client side - the clients know everything necessary to decrypt server messages.
-ADL: In most cases, the TCP/SYN/ACK is done by the OS. Is it really that much worse to do token encryption?
-MT: Because the spec doesn’t have any requirements about the token so it’s up to the application.
-ADL: Initial versions was the QUIC could use TLS retry. Nice because you could save a roundtrip. Why did we move away?
-MT: THere were people that wanted to do offload and didn’t want to deal with TLS-processing pipeline. You have to reconstruct those messages at the server.
-BT: Wanted to do this token without needing the server secret.
-ST: Bigger keys are going to cause lots of problems?
-MT: Yes.
-ADL: Omitting version negotiation is that it will always been an attack. It seems like transport parameters give you what you need.
-MT: Not sure that was the form we wanted.
-MB: You uncovered deadlocks.
-MT: They came up in weird places.
+1. ADL: The point of the handshake done is to get rid of the previous state.
+2. MT: Yes and more on this later.
+3. ADL: Another way to think about is that the on the client side - the clients know everything necessary to decrypt server messages.
+4. ADL: In most cases, the TCP/SYN/ACK is done by the OS. Is it really that much worse to do token encryption?
+5. MT: Because the spec doesn’t have any requirements about the token so it’s up to the application.
+6. ADL: Initial versions was the QUIC could use TLS retry. Nice because you could save a roundtrip. Why did we move away?
+   1. MT: THere were people that wanted to do offload and didn’t want to deal with TLS-processing pipeline. You have to reconstruct those messages at the server.
+   2. BT: Wanted to do this token without needing the server secret.
+7. ST: Bigger keys are going to cause lots of problems?
+   1. MT: Yes.
+8. ADL: Omitting version negotiation is that it will always been an attack. It seems like transport parameters give you what you need.
+   1. MT: Not sure that was the form we wanted.
+9. MB: You uncovered deadlocks.
+   1. MT: They came up in weird places.
 Package and header protection
-ADL: When can you start using CID.
-MT: As soon as you start sending.
-ADL: YOu cannot have a new CID frame inside a packet?
+1. ADL: When can you start using CID.
+   1. MT: As soon as you start sending.
+   2. ADL: YOu cannot have a new CID frame inside a packet?
 Key Update
 Migration
 Connection reset
-AH: Do you also have any repeating of the token for the initial request/response.
-It’s integrated in the token.
-AH: If you can’t filter out reflection traffic?
+1. AH: Do you also have any repeating of the token for the initial request/response.
+   1. It’s integrated in the token.
+   2. AH: If you can’t filter out reflection traffic?
 Version negotiation and other stuff
 # On Wire Images - Brian Trammel
 What is a Wire Image and Why do I care?
@@ -219,8 +225,8 @@ Geolocation by exclusion
 1ms RTT - 100km (+- a lot)
 Location privacy recommendations
 Probabilistic nonparticipation
-ADL: What does it mean to run it?
-BT: You run the algorithm.
+1. ADL: What does it mean to run it?
+   1. BT: You run the algorithm.
 Final thoughts
 # Authenticated QUIC Handshakes - Chris Wood
 A Normal Handshake
@@ -238,10 +244,10 @@ ECHO-Based Proposal
 Server-Side Processing
 ECHO Authenticated Fallback
 Downgrade Prevention
-AH: DNS provides distribution and if you use DNSSEC authentication.
-CW: It’s different because DNS is giving you the initial key then.
-AH: You have a pk but it is not validated. You can either use DNSSEC or use the DoH.
-CW: Not sure if servers would be up for that.
+1. AH: DNS provides distribution and if you use DNSSEC authentication.
+   1. CW: It’s different because DNS is giving you the initial key then.
+   2. AH: You have a pk but it is not validated. You can either use DNSSEC or use the DoH.
+   3. CW: Not sure if servers would be up for that.
 Authenticated Handshake (cont’d)
 Repeat Yourself
 Open Questions
@@ -282,25 +288,27 @@ Build size: Drop all reordered data
 Build size: don’t maintain connection info
 Down from 98 to ~60, but if you went hard at could get down to 30 KB (assumes access to hardware crypto)
 Measurements - Stack and Heap
-	Stack and heap usage
+        Stack and heap usage
 Stack usage: init phase
 Stack usage: open phase
 Stack usage: transfer phase
 Stack usage: close phase
 Heap usage: 
 Measurement - Energy and Performance
-	Energy
-	Performance
+        Energy
+        Performance
 Future work - MEasurements and Implementation
 
+
 Questions:
-ADL: Minimal overhead for code size memory overhead in TCP
-LE: Yes it’s less for TCP.  I think it will be less but don’t know for sure.
-BT: Show slides at QUIC WG.
-LE: Talked to the T2T.
+1. ADL: Minimal overhead for code size memory overhead in TCP
+   1. LE: Yes it’s less for TCP.  I think it will be less but don’t know for sure.
+2. BT: Show slides at QUIC WG.
+   1. LE: Talked to the T2T.
 PANEL
 CW: Lars what can the academic community do to help?
 Lars: Nothing they can do to make it go faster. Would be valuable to raise any security concerns bring them up.
+
 
 CW: Martin how would you sort the issues you identified?
 MT: More concerned about other aspects like does the handshake terminate and or are there other places where we’d end up in deadlock.
@@ -327,6 +335,7 @@ ADL: It’s nice to have this division but for optimization we don’t require.
 CW: Would it be useful to spec out what the handshake should look like?
 MT: Not sure we need to that, but we do learn from them for the next time.
 
+
 CW: Lots of discussion about what QUIC does more. CID still kind of leaks though.  We have some ways to protect against this leak.  In the past there has been discussions about encrypting the CID.  What’s the history and why did we land on this being the “key” to the connection.
 MT: gQUIC didn’t have the concept that you could change the CID.  Along the way we were concerned about linkability.  It is an interesting party - and there are three parties involved and you.  You want to be able to construct things from the server that the load balancer needs to consume.  Client needs to construct them too.  Things just got complicated.
 CW: Martin Duke’s draft starts to flush out the interactions needed.
@@ -347,4 +356,3 @@ FG: What percent are 0-RTT in TLS.
 MT: Like 1% when we have a ticket and we happen to need another connection.
 BT: Can you say anything about how get tickets from?
 MT: Nope we don’t know and don’t want to know.
-
